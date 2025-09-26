@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class JammoPlayer : MonoBehaviour
@@ -10,5 +11,9 @@ public class JammoPlayer : MonoBehaviour
     [Header("Inputs")]
     [SerializeField] private InputActionReference moveAction;
 
+    private void Awake()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+    }
     // TODO : Compléter cette classe.
 }
