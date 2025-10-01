@@ -11,8 +11,10 @@ public class JammoPlayer : MonoBehaviour
 
     [Header("Inputs")]
     [SerializeField] private InputActionReference moveAction;
+    [SerializeField] private InputActionReference jumpAction;
 
-    private CharacterController controller;
+private CharacterController controller;
+private float verticalVelocity;
     
     
     private void Awake()
@@ -25,6 +27,7 @@ public class JammoPlayer : MonoBehaviour
     {
         var camera = Camera.main!;
         var cameraTransform = camera.transform;
+        var up = cameraTransform.up;
         var forward = cameraTransform.forward;
         var right = cameraTransform.right;
         
@@ -36,23 +39,37 @@ public class JammoPlayer : MonoBehaviour
         //lire les entrées du joueur.
         
         var moveInput = moveAction.action.ReadValue<Vector2>();
-        
+        var jumpInput = jumpAction.action.triggered;
+
+        var horizontalMovement = Vector3.zero;
         // Si le joueur veut pas bouger, ne pas faire bouger le joueur.
 
         if (moveInput == Vector2.zero)
         {
-            controller.Move(Vector3.zero);
-        }
-        else
-        {
             var moveDirection = forward * moveInput.y + right * moveInput.x;
-            controller.Move(moveDirection * (speed * Time.deltaTime));
+            horizontalMovement=(moveDirection * (speed * Time.deltaTime));
             
             var lookRotation = Quaternion.LookRotation(moveDirection, Vector3.up);
             transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, rotationSpeed * Time.deltaTime);
-            
-            
         }
-        
+
+        var gravity = Physics.gravity;
+        var isGrounded = controller.isGrounded;
+
+        if (isGrounded)
+        {
+            verticalVelocity = 0;
+        }
+
+        if (isGrounded && jumpInput)
+        {
+            verticalVelocity = Mathf.Sqrt(2 * -gravity.y * 3f);
+        }
+
+        verticalVelocity += gravity.y * Time.deltaTime;
+
+        var verticalMovement = up * (verticalVelocity * Time.deltaTime);
+
+        controller.Move(horizontalMovement+verticalMovement);
     }
 }
